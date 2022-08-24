@@ -1,0 +1,73 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+  build:
+    commands:
+      - echo Build started on `date`
+      - mvn clean package 
+  post_build:
+    commands:
+      - echo Build completed on `date` 
+artifacts:
+  files:
+    - target/animalMgmt.jar
+  discard-paths: yes
+
+mvn sonar:sonar -Dsonar.projectKey=helloword -Dsonar.host.url=http://172.18.2.10:9000/  -Dsonar.login=2ae06ed4173a34f43cf805d668d9290a4a73ac50
+
+
+version: 0.2
+
+
+phases:
+  pre_build:
+    commands:
+      - mvn clean install
+    
+  build:
+    commands:
+      - echo Build started on `date`
+      - mvn test
+  post_build:
+    commands:
+      commands:
+      - echo Build completed on `date`
+      - mvn package
+      - printf '[{"name":"order-service","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
+artifacts:
+  files:
+   - imagedefinitions.json
+   - target/animalMgmt.jar
+
+
+
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+
+  pre_build:
+    commands:
+      - sonar_host_url="http://172.18.2.10:9000/"
+      - sonar_project_key="helloword"
+      - sonar_login="2ae06ed4173a34f43cf805d668d9290a4a73ac50"
+      - sonar_username=$(aws secretsmanager get-secret-value --secret-id $SONARQUBE_USER_CREDENTIAL_SECRET | jq -r '.SecretString' | jq -r '.username')
+      - sonar_password=$(aws secretsmanager get-secret-value --secret-id $SONARQUBE_USER_CREDENTIAL_SECRET | jq -r '.SecretString' | jq -r '.password')
+      - echo "Connectivity Sonarqube Success"
+      - echo $sonar_username
+      - echo $sonar_password
+
+  build:
+    commands:
+      - mvn --version
+      - mvn sonar:sonar -Dsonar.projectKey=$sonar_project_key -Dsonar.host.url=$sonar_host_url  -Dsonar.login=$sonar_login
+
+https://nddbcoop.sharepoint.com/:f:/s/TCSLivestackTeam/EtsjeuxguhtMmLq2GB05j1oBoWSoQvh6BiS_4seKkuxCrA?e=zhbzlm
+     
